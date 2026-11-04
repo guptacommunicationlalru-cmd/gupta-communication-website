@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Gupta Communication Lalru - CSC और ऑनलाइन सेवाएँ">
+  <title>Gupta Communication | Lalru</title>
+  <style>
+    *{box-sizing:border-box} body{margin:0;font-family:Arial,sans-serif;background:#f3f6fb;color:#172033}
+    header{background:linear-gradient(135deg,#103b70,#1766a8);color:white;padding:34px 18px;text-align:center}
+    header h1{margin:0 0 8px;font-size:clamp(25px,5vw,36px)} header p{margin:5px 0}
+    main{max-width:760px;margin:28px auto;padding:0 15px}
+    .card{background:white;border-radius:18px;padding:25px;box-shadow:0 8px 30px #17203312}
+    h2{margin-top:0;color:#123e70} label{display:block;font-weight:700;margin:17px 0 7px}
+    input,select,textarea{width:100%;padding:13px;border:1px solid #cbd5e1;border-radius:9px;font-size:16px;background:white}
+    textarea{min-height:110px;resize:vertical}
+    .consent{display:flex;gap:10px;align-items:flex-start;font-weight:400;line-height:1.5}
+    .consent input{width:auto;margin-top:4px}
+    button{width:100%;margin-top:20px;padding:15px;border:0;border-radius:10px;background:#128344;color:white;font-size:17px;font-weight:700;cursor:pointer}
+    button:disabled{opacity:.6;cursor:wait} #status{margin-top:14px;font-weight:700;line-height:1.5}
+    footer{text-align:center;color:#64748b;padding:24px;font-size:14px}
+    .services{color:#dbeafe;font-size:14px}
+  </style>
+</head>
+<body>
+<header>
+  <h1>GUPTA COMMUNICATION</h1>
+  <p><strong>LALRU – CSC & ONLINE SERVICE CENTER</strong></p>
+  <p>आपके सभी ऑनलाइन काम, अब आपके अपने शहर में!</p>
+  <p class="services">आधार • पैन कार्ड • पासपोर्ट • पुलिस वेरिफिकेशन • नौकरी फॉर्म • LIC</p>
+</header>
+<main>
+  <section class="card">
+    <h2>अपना काम दर्ज करें</h2>
+    <p>नीचे जानकारी भरें। आपकी रिक्वेस्ट सीधे Gupta Communication तक पहुँचेगी।</p>
+    <form id="requestForm">
+      <label for="name">आपका नाम *</label>
+      <input id="name" name="name" maxlength="80" required placeholder="अपना पूरा नाम">
+      <label for="mobile">मोबाइल नंबर *</label>
+      <input id="mobile" name="mobile" type="tel" inputmode="tel" maxlength="16" required placeholder="10 अंकों का मोबाइल नंबर">
+      <label for="service">कौन-सा काम करवाना है? *</label>
+      <select id="service" name="service" required>
+        <option value="">काम चुनें</option>
+        <option>आधार कार्ड</option><option>पैन कार्ड</option><option>पासपोर्ट</option>
+        <option>पुलिस वेरिफिकेशन</option><option>सरकारी नौकरी का फॉर्म</option>
+        <option>सरकारी योजना</option><option>बिजली बिल / रिचार्ज</option>
+        <option>LIC / बीमा</option><option>अन्य ऑनलाइन काम</option>
+      </select>
+      <label for="details">काम की पूरी जानकारी</label>
+      <textarea id="details" name="details" maxlength="1000" placeholder="कृपया अपने काम के बारे में लिखें"></textarea>
+      <label class="consent"><input type="checkbox" id="consent" required>
+        <span>मैं सहमत हूँ कि Gupta Communication मेरी दी गई जानकारी का उपयोग इस सेवा के संबंध में मुझसे संपर्क करने के लिए कर सकता है।</span>
+      </label>
+      <button id="submitBtn" type="submit">अपनी रिक्वेस्ट भेजें</button>
+      <div id="status" role="status" aria-live="polite"></div>
+    </form>
+  </section>
+</main>
+<footer>Gupta Communication, Lalru • सहायता: 9023111353</footer>
+<script>
+const form = document.getElementById("requestForm");
+const btn = document.getElementById("submitBtn");
+const statusBox = document.getElementById("status");
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  btn.disabled = true;
+  statusBox.textContent = "कृपया प्रतीक्षा करें...";
+  const payload = {
+    name: document.getElementById("name").value,
+    mobile: document.getElementById("mobile").value,
+    service: document.getElementById("service").value,
+    details: document.getElementById("details").value,
+    consent: document.getElementById("consent").checked
+  };
+  try {
+    const response = await fetch("/api/requests", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(payload)
+    });
+    const result = await response.json();
+    statusBox.textContent = result.message || "रिक्वेस्ट भेजने में समस्या हुई।";
+    statusBox.style.color = result.ok ? "#128344" : "#b42318";
+    if (result.ok) form.reset();
+  } catch (e) {
+    statusBox.textContent = "कनेक्शन की समस्या है। कृपया दोबारा कोशिश करें।";
+    statusBox.style.color = "#b42318";
+  } finally { btn.disabled = false; }
+});
+</script>
+</body>
+</html>
